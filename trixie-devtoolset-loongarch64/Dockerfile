@@ -5,31 +5,39 @@ FROM ${REPO}:${TAG}
 ARG DEBIAN_FRONTEND=noninteractive
 ARG NODE_VERSION="20.16.0"
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-  binutils \
-  build-essential \
-  git \
-  pkg-config \
-  fakeroot \
-  rpm \
-  sudo \
-  apt-transport-https \
-  ca-certificates \
-  libx11-dev \
-  libx11-xcb-dev \
-  libxkbfile-dev \
-  libsecret-1-dev \
-  libkrb5-dev \
-  libatomic1 \
-  curl \
-  gnupg \
-  unzip \
-  # VSCodium
-  jq
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends \
+    binutils \
+    build-essential \
+    # build-essential will provide gcc-14 and g++-14, which is overly new for us.
+    gcc-12 \
+    g++-12 \
+    git \
+    pkg-config \
+    fakeroot \
+    rpm \
+    sudo \
+    apt-transport-https \
+    ca-certificates \
+    libx11-dev \
+    libx11-xcb-dev \
+    libxkbfile-dev \
+    libsecret-1-dev \
+    libkrb5-dev \
+    libatomic1 \
+    curl \
+    gnupg \
+    unzip \
+    # VSCodium
+    jq
+
+# set gcc-12 and g++-12 as default (gcc doesn't offer support for loongarch64 until v12)
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 1 && \
+  update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 1
 
 # set python3 as default
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
-RUN python --version
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
+  python --version
 
 # setup Node.js
 RUN curl -L -O https://unofficial-builds.nodejs.org/download/release/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-loong64.tar.gz && \
